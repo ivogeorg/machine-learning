@@ -13213,24 +13213,26 @@ Make sure to keep track of the various features and conditions you tried before 
     <span class="n">predictions</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">passenger</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
         
-        <span class="c1"># Predict females and boys under 10 years old survived</span>
         <span class="c1"># Note: &#39;or&#39; is a short-circuit operator in Python</span>
 
-<span class="c1"># 79.57%        </span>
-<span class="c1">#         predictions.append(passenger[&#39;Sex&#39;] == &#39;female&#39; or </span>
-<span class="c1">#                            passenger[&#39;Age&#39;] &lt; 7)</span>
+        <span class="c1"># Search for accuracy &gt; 80%</span>
+        <span class="c1"># Iterarive deepinging in zoom (more or less a rough decision tree)</span>
 
-<span class="c1"># 79.80%        </span>
-<span class="c1">#         predictions.append(</span>
-<span class="c1">#             (passenger[&#39;Sex&#39;] == &#39;female&#39; and passenger[&#39;Pclass&#39;] != 3)</span>
-<span class="c1">#             or </span>
-<span class="c1">#             (passenger[&#39;Sex&#39;] == &#39;female&#39; and passenger[&#39;Pclass&#39;] == 3 </span>
-<span class="c1">#              and passenger[&#39;Age&#39;] &lt; 30)</span>
-<span class="c1">#             or</span>
-<span class="c1">#             passenger[&#39;Age&#39;] &lt; 7</span>
-<span class="c1">#         )</span>
+        <span class="c1"># 79.57%        </span>
+        <span class="c1">#         predictions.append(passenger[&#39;Sex&#39;] == &#39;female&#39; or </span>
+        <span class="c1">#                            passenger[&#39;Age&#39;] &lt; 7)</span>
 
-<span class="c1"># 80.47%        </span>
+        <span class="c1"># 79.80%        </span>
+        <span class="c1">#         predictions.append(</span>
+        <span class="c1">#             (passenger[&#39;Sex&#39;] == &#39;female&#39; and passenger[&#39;Pclass&#39;] != 3)</span>
+        <span class="c1">#             or </span>
+        <span class="c1">#             (passenger[&#39;Sex&#39;] == &#39;female&#39; and passenger[&#39;Pclass&#39;] == 3 </span>
+        <span class="c1">#              and passenger[&#39;Age&#39;] &lt; 30)</span>
+        <span class="c1">#             or</span>
+        <span class="c1">#             passenger[&#39;Age&#39;] &lt; 7</span>
+        <span class="c1">#         )</span>
+
+        <span class="c1"># 80.47%        </span>
         <span class="n">predictions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
             <span class="c1"># females in 1st and 2nd class</span>
             <span class="p">(</span><span class="n">passenger</span><span class="p">[</span><span class="s1">&#39;Sex&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;female&#39;</span> <span class="ow">and</span> <span class="n">passenger</span><span class="p">[</span><span class="s1">&#39;Pclass&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">3</span><span class="p">)</span>
@@ -13306,6 +13308,22 @@ Make sure to keep track of the various features and conditions you tried before 
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <p><strong>Answer</strong>: Four distinct groups show relatively higher survival rate (see code section above) for an accuracy of <strong>80.47%</strong>.</p>
+<p><strong>Explanation</strong>: At first I just tried more or less random criteria to get a sense for the data. One thing that popped up early was the <strong>SibSp</strong> and <strong>Parch</strong> variables were not very indicative (that is, they didn't give a convenient split of the population on outcome).</p>
+<p>Then I became more systematic. When I realized that a <em>decision tree</em> would be perfect for this dataset, I started looking for variables that split the leftover population best, at each consequent zoom level. <strong>Sex</strong> was clearly the best variable to split on first. I was suspicious about the galantry of humanity as a whole, so I kept thinking "Kudos to the Brits to have shown such genuine chivalry and selflessness, no matter how that was achieved!". One has only to read Jose Saramago's <em>Blindness</em> to see the ugliness and tragedy of real human collective behavior in the face of adversity or calamity. Indeed, as the reviewer pointed out, this was an exceptional case.</p>
+<p>Two intuitive criteria emerged:</p>
+<ol>
+<li>Visually, I am looking for columns or sets of columns with <em>exceptional outcome ratio</em>. Considering that more than half the people perished, <em>exceptional</em> meant something along the lines of <em>75% or better survival rate</em>.</li>
+<li>I have to look for <em>criteria that split well large numbers of people</em>, that is, I was looking for <em>high significance</em> in the overall statistics.</li>
+</ol>
+<p>As the code snippet comments show, I split the set on <strong>Sex</strong> first and then started looking for subgroups of males and females that had exceptional survival rates. Boys were one of these, but <em>Age &lt; 10</em> didn't give me the best split. It turned out to be <em>Age &lt; 7</em>. Then I thought "We are talking humans here. Class matters!" so I started exploring subgroups on <strong>Pclass</strong>. Indeed, class split the data quite well on outcome. This allowed me to refine the <em>all women survived</em> assumption into <em>most women in 1st and 2nd class survived, as well as young women in 3rd class</em>. For males, it was quite obvious that <em>able-bodied men in 1st class</em> had good survival outcomes, the sexist yuppy scumbags. Again, I played with the age brackets to squeeze the most significance (essetially a tradeoff between <em>split</em> and <em>significance</em>).</p>
+<p>In summary, the four significant splits were:</p>
+<ol>
+<li>Women in 1st and 2nd class.</li>
+<li>Women in 3rd class under 30.</li>
+<li>Boys under 7.</li>
+<li>Men in 1st class between 23 and 36.</li>
+</ol>
+<p>I didn't use any formal statistical methods but I don't see <em>data science</em> and <em>machine learning</em> for the first time. I thought the informal exercise was quite good in fine-tuning my intuition, something that would help immensely if I were shipwrecked on an island with a Kate Winslet without a computer and had to estimate our survival odds.</p>
 
 </div>
 </div>
@@ -13327,7 +13345,8 @@ Make sure to keep track of the various features and conditions you tried before 
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p><strong>Answer</strong>: <em>Supervised learning</em> is the most widely used machine learning method at present. The application domains are practically endless, as long as their is a convenient way to collect data. In fact, an AI company is successful when it can tie together the increase in accuracy of its models with the growth of its customer base in a model called <em>The AI Flywheel</em>. Self-driving cars (some time after Andrew Ng's successful self-flying toy helicopter) are only one of the examples. The data stream contains LIDAR readings, camera frames, and other sensor data. The output is correct driving (steering wheel angles, gas and break application) in various situations. The actual features are hard to explain analytically as most of this kind of learning is done in neural nets, which are notoriously difficult to interpret.</p>
+<p><strong>Answer</strong>: <em>Supervised learning</em> is the most widely used machine learning method at present. The application domains are practically endless, as long as their is a convenient way to collect data. In fact, an AI company is successful when it can tie together the increase in accuracy of its models with the growth of its customer base in a model called <em>The AI Flywheel</em>. Self-driving cars (some time after Andrew Ng's successful self-flying toy helicopter) are only one of the examples. The data stream contains LIDAR readings, camera frames, and other sensor data. The output is correct driving (steering wheel angles, gas and break application) in various situations.</p>
+<p>The actual features are, at first, not as intuitive to humans as <em>women under 30</em> and are usually hard to explain analytically without a model coming in. What has emerged from the self-driving car community's efforts is something akin to a model that has been known by neuroscientists and psychologists for decades, namely <em>a region of space perceived as belonging to the first-person agent</em> (metaphorically speaking, as we are far from robotic self-consciousness) <em>which I should avoid overlapping with the 3D spatial reconstructions of nearby objects</em>. As this is highly complex (a cloud of points with very ellaborate shape), most of this kind of learning is done in neural nets, which are notoriously difficult to interpret. Of course, machine learning is excellent in <em>trial-error-improvement</em> cycles, which is why <em>supervised learning</em> is taking over so many human activities.</p>
 
 </div>
 </div>
