@@ -28,7 +28,8 @@ class Environment(object):
     """Environment within which all agents operate."""
 
     valid_actions = [None, 'forward', 'left', 'right']
-    valid_inputs = {'light': TrafficLight.valid_states, 'oncoming': valid_actions, 'left': valid_actions, 'right': valid_actions}
+    valid_inputs = {'light': TrafficLight.valid_states, 'oncoming': valid_actions,
+                    'left': valid_actions, 'right': valid_actions}
     valid_headings = [(1, 0), (0, -1), (-1, 0), (0, 1)]  # E, N, W, S
     hard_time_limit = -100  # Set a hard time limit even if deadline is not enforced.
 
@@ -228,14 +229,16 @@ class Environment(object):
         state = self.agent_states[agent]
         location = state['location']
         heading = state['heading']
-        light = 'green' if (self.intersections[location].state and heading[1] != 0) or ((not self.intersections[location].state) and heading[0] != 0) else 'red'
+        light = 'green' if (self.intersections[location].state and heading[1] != 0) or \
+                           ((not self.intersections[location].state) and heading[0] != 0) else 'red'
 
         # Populate oncoming, left, right
         oncoming = None
         left = None
         right = None
         for other_agent, other_state in self.agent_states.iteritems():
-            if agent == other_agent or location != other_state['location'] or (heading[0] == other_state['heading'][0] and heading[1] == other_state['heading'][1]):
+            if agent == other_agent or location != other_state['location'] or \
+                    (heading[0] == other_state['heading'][0] and heading[1] == other_state['heading'][1]):
                 continue
             # For dummy agents, ignore the primary agent
             # This is because the primary agent is not required to follow the waypoint
@@ -269,7 +272,8 @@ class Environment(object):
         state = self.agent_states[agent]
         location = state['location']
         heading = state['heading']
-        light = 'green' if (self.intersections[location].state and heading[1] != 0) or ((not self.intersections[location].state) and heading[0] != 0) else 'red'
+        light = 'green' if (self.intersections[location].state and heading[1] != 0) or \
+                           ((not self.intersections[location].state) and heading[0] != 0) else 'red'
         inputs = self.sense(agent)
 
         # Assess whether the agent can move based on the action chosen.
@@ -313,7 +317,8 @@ class Environment(object):
                 elif inputs['oncoming'] == 'right': # Oncoming car turning right
                     violation = 4 # Accident
             else: # Green light
-                heading = (heading[1], -heading[0]) # Valid move. We assume the cab will wait for the lane to be clear on a green light, before taking the left turn.
+                heading = (heading[1], -heading[0]) # Valid move. We assume the cab will wait for the lane to
+                                                    # be clear on a green light, before taking the left turn.
 
         # Agent wants to drive right:
         elif action == 'right':
@@ -342,8 +347,10 @@ class Environment(object):
 
             # Move the agent
             if action is not None:
-                location = ((location[0] + heading[0] - self.bounds[0]) % (self.bounds[2] - self.bounds[0] + 1) + self.bounds[0],
-                            (location[1] + heading[1] - self.bounds[1]) % (self.bounds[3] - self.bounds[1] + 1) + self.bounds[1])  # wrap-around
+                location = ((location[0] + heading[0] - self.bounds[0]) %
+                            (self.bounds[2] - self.bounds[0] + 1) + self.bounds[0],
+                            (location[1] + heading[1] - self.bounds[1]) %
+                            (self.bounds[3] - self.bounds[1] + 1) + self.bounds[1])  # wrap-around
                 state['location'] = location
                 state['heading'] = heading
         # Agent attempted invalid move
@@ -435,7 +442,8 @@ class DummyAgent(Agent):
     color_choices = ['cyan', 'red', 'blue', 'green', 'orange', 'magenta', 'yellow']
 
     def __init__(self, env):
-        super(DummyAgent, self).__init__(env)  # sets self.env = env, state = None, next_waypoint = None, and a default color
+        super(DummyAgent, self).__init__(env)  # sets self.env = env, state = None,
+                                               # next_waypoint = None, and a default color
         self.next_waypoint = random.choice(Environment.valid_actions[1:])
         self.color = random.choice(self.color_choices)
 
